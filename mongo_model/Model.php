@@ -48,12 +48,15 @@ abstract class Model extends \rox\ActiveModel {
 		}
 	}
 
-	public function _fromMongoData($data) {
-		$this->setId($data['_id']);
+	public static function _fromMongoData($data) {
+		$class = get_called_class();
+		$instance = new $class;
+		$instance->setId($data['_id']);
 		unset($data['_id']);
-		$this->setData($data);
-		$this->_resetModifiedAttributesFlags();
-		$this->_newRecord = false;
+		$instance->setData($data);
+		$instance->_resetModifiedAttributesFlags();
+		$instance->_newRecord = false;
+		return $instance;
 	}
 
 	public static function __callStatic($method, $args) {
@@ -122,16 +125,12 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	public static function find($id) {
-		$data = static::collection()->findOne(array('_id' => new \MongoId($id)));
-		if (empty($data)) {
+		$result = static::collection()->findOne(array('_id' => new \MongoId($id)));
+		if (empty($result)) {
 			throw new Exception("Couldn't find record with ID = {$id}");
 		}
 
-		$class = get_called_class();
-
-		$instance = new $class;
-		$instance->_fromMongoData($data);
-		return $instance;
+		return static::_fromMongoData($result);;
 	}
 
 	public static function findFirst($options = array()) {
@@ -143,10 +142,7 @@ abstract class Model extends \rox\ActiveModel {
 			return false;
 		}
 
-		$class = get_called_class();
-		$instance = new $class;
-		$instance->_fromMongoData($result);
-		return $instance;
+		return static::_fromMongoData($result);;
 	}
 
 	public static function findAll($options = array()) {
@@ -154,13 +150,10 @@ abstract class Model extends \rox\ActiveModel {
 		$options += $defaults;
 
 		$records = array();
-		$class = get_called_class();
 
 		$results = static::collection()->find($options['conditions'], $options['fields']);
 		foreach ($results as $result) {
-			$instance = new $class;
-			$instance->_fromMongoData($result);
-			$records[] = $instance;
+			$records[] = static::_fromMongoData($result);;
 		}
 
 		return $records;
