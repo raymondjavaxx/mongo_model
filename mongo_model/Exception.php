@@ -1,6 +1,6 @@
 <?php
 /**
- * RoxPHP
+ * MongoModel
  *
  * Copyright (C) 2011 Ramon Torres
  *
@@ -21,3 +21,4 @@ namespace mongo_model;
  */
 class Exception extends \Exception {
 }
+
