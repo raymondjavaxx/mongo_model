@@ -56,6 +56,20 @@ abstract class Model extends \rox\ActiveModel {
 		$this->_newRecord = false;
 	}
 
+	public static function __callStatic($method, $args) {
+		if (strpos($method, 'findBy') === 0) {
+			$key = Inflector::underscore(substr($method, 6));
+			return static::findFirst(array('conditions' => array($key => $args[0])));
+		}
+
+		if (strpos($method, 'findAllBy') === 0) {
+			$key = Inflector::underscore(substr($method, 9));
+			return static::findAll(array('conditions' => array($key => $args[0])));
+		}
+
+		throw new Exception('Undefined method ' . get_called_class() . '::' . $method . '()');
+	}
+
 	public static function collection() {
 		if (static::$_collection === null) {
 			$collectionName = Inflector::tableize(get_called_class());
@@ -120,11 +134,29 @@ abstract class Model extends \rox\ActiveModel {
 		return $instance;
 	}
 
-	public static function findAll($criteria = array()) {
+	public static function findFirst($options = array()) {
+		$defaults = array('conditions' => array(), 'fields' => array());
+		$options += $defaults;
+
+		$result = static::collection()->findOne($options['conditions'], $options['fields']);
+		if (empty($result)) {
+			return false;
+		}
+
+		$class = get_called_class();
+		$instance = new $class;
+		$instance->_fromMongoData($result);
+		return $instance;
+	}
+
+	public static function findAll($options = array()) {
+		$defaults = array('conditions' => array(), 'fields' => array());
+		$options += $defaults;
+
 		$records = array();
 		$class = get_called_class();
 
-		$results = static::collection()->find($criteria);
+		$results = static::collection()->find($options['conditions'], $options['fields']);
 		foreach ($results as $result) {
 			$instance = new $class;
 			$instance->_fromMongoData($result);
