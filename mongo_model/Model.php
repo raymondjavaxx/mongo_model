@@ -23,24 +23,24 @@ use \rox\Inflector;
  */
 abstract class Model extends \rox\ActiveModel {
 
-	protected $_collection;
+	protected static $_collection;
 
-	protected $_fieldMap = array();
+	protected static $_fieldMap = array();
 
 	public function setData($attribute, $value = null) {
 		if (is_array($attribute)) {
 			foreach ($attribute as $k => $v) {
-				if (!in_array($k, $this->_protectedAttributes)) {
+				if (!in_array($k, static::$_protectedAttributes)) {
 					$this->setData($k, $v);
 				}
 			}
 		} else {
-			if (!array_key_exists($attribute, $this->_fieldMap)) {
+			if (!array_key_exists($attribute, static::$_fieldMap)) {
 				throw new Exception('unknown attribute ' . $attribute);
 			}
 
 			$this->_data[$attribute] = $value;
-			settype($this->_data[$attribute], $this->_fieldMap[$attribute]);
+			settype($this->_data[$attribute], static::$_fieldMap[$attribute]);
 			$this->_flagAttributeAsModified($attribute);
 		}
 	}
@@ -53,14 +53,14 @@ abstract class Model extends \rox\ActiveModel {
 		$this->_newRecord = false;
 	}
 
-	public function collection() {
-		if ($this->_collection === null) {
-			$collectionName = Inflector::tableize(get_class($this));
-			$db = ConnectionManager::getDataSource($this->_dataSourceName);
-			$this->_collection = $db->selectCollection($collectionName);
+	public static function collection() {
+		if (static::$_collection === null) {
+			$collectionName = Inflector::tableize(get_called_class());
+			$db = ConnectionManager::getDataSource(static::$_dataSourceName);
+			static::$_collection = $db->selectCollection($collectionName);
 		}
 
-		return $this->_collection;
+		return static::$_collection;
 	}
 
 	public function modifiedAttributes() {
@@ -104,24 +104,24 @@ abstract class Model extends \rox\ActiveModel {
 		return true;
 	}
 
-	public function find($id) {
-		$data = $this->collection()->findOne(array('_id' => new \MongoId($id)));
+	public static function find($id) {
+		$data = static::collection()->findOne(array('_id' => new \MongoId($id)));
 		if (empty($data)) {
 			throw new Exception("Couldn't find record with ID = {$id}");
 		}
 
-		$class = get_class($this);
+		$class = get_called_class();
 
 		$instance = new $class;
 		$instance->_fromMongoData($data);
 		return $instance;
 	}
 
-	public function findAll($criteria = array()) {
+	public static function findAll($criteria = array()) {
 		$records = array();
-		$class = get_class($this);
+		$class = get_called_class();
 
-		$results = $this->collection()->find($criteria);
+		$results = static::collection()->find($criteria);
 		foreach ($results as $result) {
 			$instance = new $class;
 			$instance->_fromMongoData($result);
@@ -139,7 +139,7 @@ abstract class Model extends \rox\ActiveModel {
 		$this->_beforeDelete();
 
 		$criteria = array('_id' => $this->mongoId());
-		$this->collection()->remove($criteria, array('justOne' => true, 'safe' => true));
+		static::collection()->remove($criteria, array('justOne' => true, 'safe' => true));
 
 		$this->_afterDelete();
 	}
