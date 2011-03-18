@@ -35,12 +35,15 @@ abstract class Model extends \rox\ActiveModel {
 				}
 			}
 		} else {
-			if (!array_key_exists($attribute, static::$_fieldMap)) {
+			if (!array_key_exists($attribute, static::$_fieldMap) && $attribute != 'id') {
 				throw new Exception('unknown attribute ' . $attribute);
 			}
 
+			$type = isset(static::$_fieldMap[$attribute])
+				? static::$_fieldMap[$attribute] : 'string';
+
 			$this->_data[$attribute] = $value;
-			settype($this->_data[$attribute], static::$_fieldMap[$attribute]);
+			settype($this->_data[$attribute], $type);
 			$this->_flagAttributeAsModified($attribute);
 		}
 	}
