@@ -73,6 +73,11 @@ abstract class Model extends \rox\ActiveModel {
 		throw new Exception('Undefined method ' . get_called_class() . '::' . $method . '()');
 	}
 
+	/**
+	 * Returns the \MongoCollection for the model
+	 *
+	 * @return \MongoCollection
+	 */
 	public static function collection() {
 		if (static::$_collection === null) {
 			$collectionName = Inflector::tableize(get_called_class());
@@ -83,6 +88,11 @@ abstract class Model extends \rox\ActiveModel {
 		return static::$_collection;
 	}
 
+	/**
+	 * Returns the modified attributes
+	 *
+	 * @return array
+	 */
 	public function modifiedAttributes() {
 		$data = array();
 		foreach ($this->_modifiedAttributes as $attribute) {
@@ -96,6 +106,11 @@ abstract class Model extends \rox\ActiveModel {
 		return new \MongoId($this->getId());
 	}
 
+	/**
+	 * Saves the document
+	 *
+	 * @return boolean
+	 */
 	public function save() {
 		if (!$this->valid()) {
 			return false;
@@ -124,6 +139,12 @@ abstract class Model extends \rox\ActiveModel {
 		return true;
 	}
 
+	/**
+	 * Finds a document by id
+	 *
+	 * @param string $id 
+	 * @return \mongo_model\Model
+	 */
 	public static function find($id) {
 		$result = static::collection()->findOne(array('_id' => new \MongoId($id)));
 		if (empty($result)) {
@@ -133,6 +154,12 @@ abstract class Model extends \rox\ActiveModel {
 		return static::_fromMongoData($result);;
 	}
 
+	/**
+	 * Finds the first document that matches the conditions
+	 *
+	 * @param array $options 
+	 * @return \mongo_model\Model
+	 */
 	public static function findFirst($options = array()) {
 		$defaults = array('conditions' => array(), 'fields' => array());
 		$options += $defaults;
@@ -145,6 +172,12 @@ abstract class Model extends \rox\ActiveModel {
 		return static::_fromMongoData($result);;
 	}
 
+	/**
+	 * Queries the collection
+	 *
+	 * @param array $options 
+	 * @return array of \mongo_model\Model
+	 */
 	public static function findAll($options = array()) {
 		$defaults = array(
 			'conditions' => array(),
@@ -173,9 +206,15 @@ abstract class Model extends \rox\ActiveModel {
 		return $records;
 	}
 
+	/**
+	 * Deletes the document from collection
+	 *
+	 * @return void
+	 * @throws \mongo_model\Exception
+	 */
 	public function delete() {
 		if ($this->_newRecord) {
-			throw new Exception("You can't delete new records");
+			throw new Exception("Can't delete new record");
 		}
 
 		$this->_beforeDelete();
