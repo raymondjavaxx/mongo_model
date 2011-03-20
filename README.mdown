@@ -1,0 +1,59 @@
+mongo_model
+===========
+
+mongo_model is a library that adds MongoDB support to RoxPHP. To start using it just [download the latest release](https://github.com/raymondjavaxx/mongo_model/archives/master) and drop it to `app/libraries/mongo_model`.
+
+Using mongo_model
+-----------------
+
+To create a MongoDB backed model extend `\mongo_model\Model` and define the schema by overriding the `_fieldmap` static property.
+
+	class Post extends \mongo_model\Model {
+	
+		protected static $_fieldMap = array(
+			'title' => 'string',
+			'body' => 'string',
+			'author' => 'string'
+		);
+	
+		protected function _validate() {
+			// validation code
+		}
+	}
+
+Since `\mongo_model\Model` is a `\rox\ActiveModel` the validation can be handled via validation callbacks. The interface of `\mongo_model\Model` is very similar to `\rox\Activerecord`, here are couple examples:
+
+Creating new record:
+
+	$post = new Post(array(
+		'title' => 'Hello',
+		'body' => 'Hello World!',
+		'author' => 'James'
+	));
+
+	$post->save();
+
+Finding all records:
+
+	$posts = Post::findAll();
+
+Finding records with conditionals:
+
+	$posts = Post::findAll(array('conditions' => array('author' => 'James')));
+
+	// or
+
+	$posts = Post::findAllByAuthor('James');
+
+Finding a single records:
+
+	$post = Post::findFirst(array('title' => 'Hello'));
+
+	// or
+
+	$post = Post::findByTitle('Hello');
+
+Copyright
+---------
+
+Copyright (C) 2011 Ramon Torres. Licensed under [The MIT License](http://www.opensource.org/licenses/mit-license.php)
