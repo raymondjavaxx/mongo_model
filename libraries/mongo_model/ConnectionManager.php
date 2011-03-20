@@ -31,10 +31,10 @@ class ConnectionManager {
 	 * @var array
 	 */
 	protected static $_configs = array(
-		'default' => array(
-			'database' => 'db',
-			'server' => 'mongodb://127.0.0.1:27017'
-		)
+		//'default' => array(
+		//	'database' => 'db',
+		//	'server' => 'mongodb://127.0.0.1:27017'
+		//)
 	);
 
 	public static function getDataSource($name = 'default') {
