@@ -146,13 +146,27 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	public static function findAll($options = array()) {
-		$defaults = array('conditions' => array(), 'fields' => array());
+		$defaults = array(
+			'conditions' => array(),
+			'fields' => array(),
+			'order' => array(),
+			'limit' => false
+		);
+
 		$options += $defaults;
 
 		$records = array();
 
-		$results = static::collection()->find($options['conditions'], $options['fields']);
-		foreach ($results as $result) {
+		$cursor = static::collection()->find($options['conditions'], $options['fields']);
+		if (!empty($options['order'])) {
+			$cursor->sort($options['order']);
+		}
+
+		if ($options['limit'] !== false) {
+			$cursor->limit($options['limit']);
+		}
+
+		foreach ($cursor as $result) {
 			$records[] = static::_fromMongoData($result);;
 		}
 
