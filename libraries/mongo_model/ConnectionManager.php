@@ -16,10 +16,15 @@ namespace mongo_model;
 
 use \Mongo;
 
+/**
+ * Connection Manager
+ *
+ * @package mongo_model
+ */
 class ConnectionManager {
 
 	/**
-	 * MongoDB instances
+	 * \MongoDB instances
 	 *
 	 * @var array
 	 */
@@ -37,6 +42,12 @@ class ConnectionManager {
 		//)
 	);
 
+	/**
+	 * Returns a \MongoDB instance for a named datasource
+	 *
+	 * @param string $name 
+	 * @return \MongoDB
+	 */
 	public static function getDataSource($name = 'default') {
 		if (!isset(self::$_databases[$name])) {
 			self::_instantiateDataSource($name);
@@ -45,11 +56,26 @@ class ConnectionManager {
 		return self::$_databases[$name];
 	}
 
+	/**
+	 * Sets the configuration for a named datasource
+	 *
+	 * @param string $name name of datasource
+	 * @param array $config 
+	 *     - database: name of MongoDB database
+	 *     - server: MongoDB server name (defaults to mongodb://127.0.0.1:27017)
+	 * @return void
+	 */
 	public static function setConfig($name, $config = array()) {
 		$defaults = array('database' => 'db','server' => 'mongodb://127.0.0.1:27017');
 		self::$_configs[$name] = ($config + $defaults);
 	}
 
+	/**
+	 * Handles the instantiation of a named datasource
+	 *
+	 * @param string $name 
+	 * @return void
+	 */
 	protected static function _instantiateDataSource($name) {
 		if (!isset(self::$_configs[$name])) {
 			throw new Exception('Configuration entry not found for ' . $name);
