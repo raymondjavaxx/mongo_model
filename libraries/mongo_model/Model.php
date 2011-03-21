@@ -161,15 +161,9 @@ abstract class Model extends \rox\ActiveModel {
 	 * @return \mongo_model\Model
 	 */
 	public static function findFirst($options = array()) {
-		$defaults = array('conditions' => array(), 'fields' => array());
-		$options += $defaults;
-
-		$result = static::collection()->findOne($options['conditions'], $options['fields']);
-		if (empty($result)) {
-			return false;
-		}
-
-		return static::_fromMongoData($result);;
+		$options += array('limit' => 1);
+		$results = static::findAll($options);
+		return reset($results);
 	}
 
 	/**

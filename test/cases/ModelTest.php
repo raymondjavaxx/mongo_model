@@ -49,6 +49,14 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame($result->id, $post->id);
 	}
 
+	public function testFindFirst() {
+		MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 2', 'body' => 'Hello World 2!', 'author' => 'James'));
+		$result = MockPost::findFirst(array('conditions' => array('author' => 'James')));
+		$this->assertTrue(is_object($result));
+		$this->assertSame('Hello 1', $result->title);
+	}
+
 	public function testFindWithNonExistingId() {
 		$this->setExpectedException('\mongo_model\Exception');
 		$post = MockPost::find('4d85b2ec5300dac40e000000');
