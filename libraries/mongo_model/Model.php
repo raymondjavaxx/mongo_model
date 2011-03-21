@@ -25,7 +25,7 @@ abstract class Model extends \rox\ActiveModel {
 
 	protected static $_collection;
 
-	protected static $_fieldMap = array();
+	protected static $_schema = array();
 
 	public function setData($attribute, $value = null) {
 		if (is_array($attribute)) {
@@ -35,12 +35,12 @@ abstract class Model extends \rox\ActiveModel {
 				}
 			}
 		} else {
-			if (!array_key_exists($attribute, static::$_fieldMap) && $attribute != 'id') {
+			if (!array_key_exists($attribute, static::$_schema) && $attribute != 'id') {
 				throw new Exception('unknown attribute ' . $attribute);
 			}
 
-			$type = isset(static::$_fieldMap[$attribute])
-				? static::$_fieldMap[$attribute] : 'string';
+			$type = isset(static::$_schema[$attribute])
+				? static::$_schema[$attribute] : 'string';
 
 			$this->_data[$attribute] = $value;
 			settype($this->_data[$attribute], $type);

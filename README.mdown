@@ -16,11 +16,11 @@ As simple as:
 Using mongo_model
 -----------------
 
-To create a MongoDB backed model extend `\mongo_model\Model` and define the schema by overriding the `_fieldmap` static property.
+To create a MongoDB backed model extend `\mongo_model\Model` and define the schema by overriding the `_schema` static property.
 
 	class Post extends \mongo_model\Model {
 	
-		protected static $_fieldMap = array(
+		protected static $_schema = array(
 			'title' => 'string',
 			'body' => 'string',
 			'author' => 'string'

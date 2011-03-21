@@ -18,7 +18,7 @@ class MockPost extends \mongo_model\Model {
 
 	protected static $_dataSourceName = 'mongo_model_test';
 
-    protected static $_fieldMap = array(
+    protected static $_schema = array(
         'title' => 'string',
         'body' => 'string',
         'author' => 'string'
