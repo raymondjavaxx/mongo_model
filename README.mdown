@@ -3,6 +3,16 @@ mongo_model
 
 mongo_model is a library that adds MongoDB support to RoxPHP. To start using it just [download the latest release](https://github.com/raymondjavaxx/mongo_model/archives/master) and drop it to `app/libraries/mongo_model`.
 
+Configuring
+-----------
+
+As simple as:
+
+	\mongo_model\ConnectionManager::setConfig('default', array(
+		'database' => 'blog',
+		'server' => 'mongodb://127.0.0.1:27017'
+	));
+
 Using mongo_model
 -----------------
 
