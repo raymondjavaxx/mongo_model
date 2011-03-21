@@ -23,7 +23,7 @@ use \mongo_model\test\mocks\MockPost;
 class ModelTest extends \PHPUnit_Framework_TestCase {
 
 	protected function setUp() {
-		ConnectionManager::setConfig('mongo_model_test', array('db' => 'mongo_model_test'));
+		ConnectionManager::setConfig('mongo_model_test', array('database' => 'mongo_model_test'));
 		MockPost::collection()->drop();
 	}
 
