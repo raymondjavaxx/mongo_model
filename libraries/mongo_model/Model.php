@@ -82,7 +82,8 @@ abstract class Model extends \rox\ActiveModel {
 		if (static::$_collection === null) {
 			$collectionName = Inflector::tableize(get_called_class());
 			$db = ConnectionManager::getDataSource(static::$_dataSourceName);
-			static::$_collection = $db->selectCollection($collectionName);
+			$collection = $db->selectCollection($collectionName);
+			static::$_collection = &$collection;
 		}
 
 		return static::$_collection;
