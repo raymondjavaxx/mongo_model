@@ -15,6 +15,7 @@
 namespace mongo_model;
 
 use \rox\Inflector;
+use \rox\active_record\PaginationResult;
 
 /**
  * Model base class
@@ -168,6 +169,16 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	/**
+	 * Counts the number of collections a query returns
+	 *
+	 * @param string $conditions 
+	 * @return \mongo_model\Model
+	 */
+	public static function findCount($conditions = array()) {
+		return static::collection()->find($conditions)->count();
+	}
+	
+	/**
 	 * Queries the collection
 	 *
 	 * @param array $options 
@@ -189,9 +200,14 @@ abstract class Model extends \rox\ActiveModel {
 		if (!empty($options['order'])) {
 			$cursor->sort($options['order']);
 		}
-
+		
 		if ($options['limit'] !== false) {
-			$cursor->limit($options['limit']);
+			$limits = explode(',', $options['limit']);
+			if(count($limits)>1) {
+				$cursor->skip($limits[0])->limit($limits[1]);
+			} else {
+				$cursor->limit($options['limit']);
+			}
 		}
 
 		foreach ($cursor as $result) {
@@ -199,6 +215,50 @@ abstract class Model extends \rox\ActiveModel {
 		}
 
 		return $records;
+	}
+
+	/**
+	 * Paginates results
+	 * 
+	 * @param array $options
+	 * @return ActiveRecord_PaginationResult
+	 */
+	public static function paginate($options = array()) {
+		$defaultOptions = array(
+			'per_page'   => 10,
+			'page'       => 1,
+			'conditions' => array(),
+			'order'      => null,
+			'attributes' => null,
+			'group'      => null
+		);
+
+		$options = array_merge($defaultOptions, $options);
+
+		$pages = 1;
+		$currentPage = 1;
+		$items = array();
+
+		$total = static::findCount($options['conditions']);
+		if ($total > 0) {
+			$pages = (integer)ceil($total / $options['per_page']);
+			$currentPage = min(max(intval($options['page']), 1), $pages);
+			$limit = sprintf('%d, %d', ($currentPage - 1) * $options['per_page'], $options['per_page']);
+			$items = static::findAll(array(
+				'conditions' => $options['conditions'],
+				'attributes' => $options['attributes'],
+				'order'      => $options['order'],
+				'limit'      => $limit,
+				'group'      => $options['group']
+			));
+		}
+
+		$nextPage = min($pages, $currentPage + 1);
+		$previousPage = max(1, $currentPage - 1);
+
+		$result = new PaginationResult($items, $pages, $currentPage,
+			$nextPage, $previousPage, $total);
+		return $result;
 	}
 
 	/**
