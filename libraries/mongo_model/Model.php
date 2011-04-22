@@ -169,10 +169,10 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	/**
-	 * Counts the number of collections a query returns
+	 * Counts the number of documents a query returns
 	 *
-	 * @param string $conditions 
-	 * @return \mongo_model\Model
+	 * @param array $conditions 
+	 * @return integer
 	 */
 	public static function findCount($conditions = array()) {
 		return static::collection()->find($conditions)->count();
@@ -218,10 +218,10 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	/**
-	 * Paginates results
-	 * 
+	 * Paginates over documents
+	 *
 	 * @param array $options
-	 * @return ActiveRecord_PaginationResult
+	 * @return \rox\actite_record\PaginationResult
 	 */
 	public static function paginate($options = array()) {
 		$defaultOptions = array(
