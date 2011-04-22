@@ -57,6 +57,26 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('Hello 1', $result->title);
 	}
 
+	public function testPaginate() {
+		MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 2', 'body' => 'Hello World 2!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 3', 'body' => 'Hello World 3!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 4', 'body' => 'Hello World 4!', 'author' => 'James'));
+
+		$results = MockPost::paginate(array('page' => 1, 'per_page' => 2));
+
+		$this->assertInstanceOf('\rox\active_record\PaginationResult', $results);
+		$this->assertEquals(2, count($results));
+		$this->assertSame('Hello 1', $results[0]->title);
+		$this->assertSame('Hello 2', $results[1]->title);
+
+		$results = MockPost::paginate(array('page' => 2, 'per_page' => 2));
+
+		$this->assertEquals(2, count($results));
+		$this->assertSame('Hello 3', $results[0]->title);
+		$this->assertSame('Hello 4', $results[1]->title);
+	}
+
 	public function testFindWithNonExistingId() {
 		$this->setExpectedException('\mongo_model\Exception');
 		$post = MockPost::find('4d85b2ec5300dac40e000000');

@@ -189,12 +189,11 @@ abstract class Model extends \rox\ActiveModel {
 			'conditions' => array(),
 			'fields' => array(),
 			'order' => array(),
-			'limit' => false
+			'limit' => false,
+			'skip' => false
 		);
 
 		$options += $defaults;
-
-		$records = array();
 
 		$cursor = static::collection()->find($options['conditions'], $options['fields']);
 		if (!empty($options['order'])) {
@@ -202,13 +201,14 @@ abstract class Model extends \rox\ActiveModel {
 		}
 		
 		if ($options['limit'] !== false) {
-			$limits = explode(',', $options['limit']);
-			if(count($limits)>1) {
-				$cursor->skip($limits[0])->limit($limits[1]);
-			} else {
-				$cursor->limit($options['limit']);
-			}
+			$cursor->limit($options['limit']);
 		}
+
+		if ($options['skip'] !== false) {
+			$cursor->skip($options['skip']);
+		}
+
+		$records = array();
 
 		foreach ($cursor as $result) {
 			$records[] = static::_fromMongoData($result);;
@@ -243,12 +243,14 @@ abstract class Model extends \rox\ActiveModel {
 		if ($total > 0) {
 			$pages = (integer)ceil($total / $options['per_page']);
 			$currentPage = min(max(intval($options['page']), 1), $pages);
-			$limit = sprintf('%d, %d', ($currentPage - 1) * $options['per_page'], $options['per_page']);
+			$skip = ($currentPage - 1) * $options['per_page'];
+
 			$items = static::findAll(array(
 				'conditions' => $options['conditions'],
 				'attributes' => $options['attributes'],
 				'order'      => $options['order'],
-				'limit'      => $limit,
+				'skip'       => $skip,
+				'limit'      => $options['per_page'],
 				'group'      => $options['group']
 			));
 		}
