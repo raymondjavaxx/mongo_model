@@ -91,7 +91,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
 		$post = MockPost::findByAuthor('James');
 		$this->assertTrue(is_object($post));
-		$this->assertTrue($post instanceof \mongo_model\test\mocks\MockPost);
+		$this->assertInstanceOf('\mongo_model\test\mocks\MockPost', $post);
 	}
 
 	public function testFindAllBy() {
