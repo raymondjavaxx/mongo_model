@@ -49,6 +49,18 @@ abstract class Model extends \rox\ActiveModel {
 		}
 	}
 
+	public function __get($attribute) {
+		if (array_key_exists($attribute, $this->_data)) {
+			return $this->_data[$attribute];
+		}
+
+		if (array_key_exists($attribute, static::$_schema)) {
+			return null;
+		}
+
+		throw new Exception("unknown attribute {$attribute}");
+	}
+
 	public static function _fromMongoData($data) {
 		$class = get_called_class();
 		$instance = new $class;

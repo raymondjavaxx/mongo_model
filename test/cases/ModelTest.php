@@ -55,6 +55,20 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('Carl', $existingPost->author);
 	}
 
+	public function testDefaultValues() {
+		$post = new MockPost(array('title' => 'Hello'));
+		$this->assertNull($post->body);
+	}
+
+	public function testInvalidAttribute() {
+		$post = MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+
+		$this->setExpectedException('\mongo_model\Exception');
+
+		// try to access an attribute that is not defined in the schema
+		$revision = $post->revision;
+	}
+
 	public function testFind() {
 		$post = MockPost::create(array(
 			'title' => 'Hello 1',
