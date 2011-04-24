@@ -133,7 +133,7 @@ abstract class Model extends \rox\ActiveModel {
 			$this->_newRecord = false;
 		} else {
 			$criteria = array('_id' => $this->mongoId());
-			$this->collection()->update($criteria, $attributes);
+			$this->collection()->update($criteria, array('$set' => $attributes));
 			$this->_resetModifiedAttributesFlags();
 			$this->_afterSave(false);
 		}

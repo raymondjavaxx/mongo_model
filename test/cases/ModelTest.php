@@ -37,6 +37,24 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($post->save());
 	}
 
+	public function testUpdate() {
+		$post = new MockPost(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$post->save();
+
+		// load post and update attribute
+		$existingPost = MockPost::find($post->id);
+		$existingPost->author = 'Carl';
+		$existingPost->save();
+
+		// reload post
+		$existingPost = MockPost::find($post->id);
+
+		$this->assertArrayHasKey('title', $existingPost->getData());
+		$this->assertArrayHasKey('body', $existingPost->getData());
+		$this->assertArrayHasKey('author', $existingPost->getData());
+		$this->assertSame('Carl', $existingPost->author);
+	}
+
 	public function testFind() {
 		$post = MockPost::create(array(
 			'title' => 'Hello 1',
