@@ -30,4 +30,16 @@ class ManyTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('\MockComment', $result[0]);
 		$this->assertInstanceOf('\MockComment', $result[1]);
 	}
+
+	public function testSerializeForSaving() {
+		$data = array(
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'James', 'message' => 'Hello'),
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'Armaan', 'message' => 'Hello')
+		);
+
+		$collection = Many::fromMongoData(new MockPost, 'mock_comments', $data);
+		$result = $collection->serializeForSaving();
+
+		$this->assertEquals($data, $result);
+	}
 }

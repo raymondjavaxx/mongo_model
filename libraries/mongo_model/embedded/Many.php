@@ -83,6 +83,10 @@ class Many implements \ArrayAccess, \Countable {
 				$objectData['_id'] = new \MongoId();
 			}
 
+			if (isset($objectData['id'])) {
+				unset($objectData['id']);
+			}
+
 			$data[] = $objectData;
 		}
 
