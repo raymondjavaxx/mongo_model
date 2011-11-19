@@ -12,13 +12,9 @@
  * @license The MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-namespace mongo_model\test\cases;
-
 require_once dirname(__DIR__) . '/helper.php';
-require_once dirname(__DIR__) . '/mocks/MockPost.php';
 
 use \mongo_model\ConnectionManager;
-use \mongo_model\test\mocks\MockPost;
 
 class ModelTest extends \PHPUnit_Framework_TestCase {
 
@@ -123,7 +119,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 
 		$post = MockPost::findByAuthor('James');
 		$this->assertTrue(is_object($post));
-		$this->assertInstanceOf('\mongo_model\test\mocks\MockPost', $post);
+		$this->assertInstanceOf('\MockPost', $post);
 	}
 
 	public function testFindAllBy() {
@@ -135,5 +131,43 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$results = MockPost::findAllByAuthor('James');
 		$this->assertTrue(is_array($results));
 		$this->assertEquals(2, count($results));
+	}
+
+	public function testEmbedded() {
+		$this->assertFalse(MockPost::embedded());
+		$this->assertTrue(MockComment::embedded());
+	}
+
+	public function testEmbeddedCollectionInstance() {
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$this->assertInstanceOf('\mongo_model\embedded\Many', $post->mock_comments);
+	}
+
+	public function testAppendingInvalidValueToEmbeddedCollection() {
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+
+		$this->setExpectedException('\mongo_model\embedded\Exception');
+		$post->mock_comments[] = "Hello";
+
+		$this->setExpectedException('\mongo_model\embedded\Exception');
+		$post->mock_comments[] = new \stdClass();
+	}
+
+	public function testAppendingToEmbeddedCollection() {
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$this->assertEquals(0, count($post->mock_comments));
+		$post->mock_comments[] = new MockComment(array('author' => 'Jane', 'body' => 'hello'));
+		$post->mock_comments[] = new MockComment(array('author' => 'Carl', 'body' => 'hello'));
+		$this->assertEquals(2, count($post->mock_comments));
+	}
+
+	public function testSavingAndRetrievingWithEmbeddedObjects() {
+		$original = new MockPost(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$original->mock_comments[] = new MockComment(array('author' => 'Jane', 'body' => 'hello'));
+		$original->mock_comments[] = new MockComment(array('author' => 'Carl', 'body' => 'hello'));
+		$this->assertTrue($original->save());
+
+		$saved = MockPost::find($original->id);
+		$this->assertEquals(2, count($saved->mock_comments));
 	}
 }

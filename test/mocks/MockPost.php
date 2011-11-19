@@ -12,11 +12,11 @@
  * @license The MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-namespace mongo_model\test\mocks;
-
 class MockPost extends \mongo_model\Model {
 
 	protected static $_dataSourceName = 'mongo_model_test';
+
+	protected static $_embedsMany = array('mock_comments');
 
     protected static $_schema = array(
         'title' => 'string',

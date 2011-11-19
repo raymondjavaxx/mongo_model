@@ -16,62 +16,50 @@ namespace mongo_model;
 
 use \rox\Inflector;
 use \rox\active_record\PaginationResult;
+use \mongo_model\embedded\Many;
 
 /**
  * Model base class
  *
  * @package mongo_model
  */
-abstract class Model extends \rox\ActiveModel {
+abstract class Model extends Base {
 
-	protected static $_collection;
-
+	/**
+	 * Document schema. Must be re-declared by subclasses. Schema should be defined as
+	 * pairs of key-value where the key is the name of attribute and the value is the type.
+	 *
+	 * {{{
+	 *    class Post extends \mongo_model\Model {
+	 *        protected static $_schema = array(
+	 *            'title'      => 'string',
+	 *            'body'       => 'string',
+	 *            'published'  => 'boolean',
+	 *            'created_at' => 'integer',
+	 *            'updated_at' => 'integer'
+	 *        );
+	 *    }
+	 * }}}
+	 *
+	 * @var array
+	 */
 	protected static $_schema = array();
 
-	public function setData($attribute, $value = null) {
-		if (is_array($attribute)) {
-			foreach ($attribute as $k => $v) {
-				if (!in_array($k, static::$_protectedAttributes)) {
-					$this->setData($k, $v);
-				}
-			}
-		} else {
-			if (!array_key_exists($attribute, static::$_schema) && $attribute != 'id') {
-				throw new Exception('unknown attribute ' . $attribute);
-			}
+	/**
+	 * \MongoCollection of model
+	 *
+	 * @var \MongoCollection
+	 */
+	protected static $_collection;
 
-			$type = isset(static::$_schema[$attribute])
-				? static::$_schema[$attribute] : 'string';
-
-			$this->_data[$attribute] = $value;
-			settype($this->_data[$attribute], $type);
-			$this->_flagAttributeAsModified($attribute);
-		}
-	}
-
-	public function __get($attribute) {
-		if (array_key_exists($attribute, $this->_data)) {
-			return $this->_data[$attribute];
-		}
-
-		if (array_key_exists($attribute, static::$_schema)) {
-			return null;
-		}
-
-		throw new Exception("unknown attribute {$attribute}");
-	}
-
-	public static function _fromMongoData($data) {
-		$class = get_called_class();
-		$instance = new $class;
-		$instance->setId($data['_id']);
-		unset($data['_id']);
-		$instance->setData($data);
-		$instance->_resetModifiedAttributesFlags();
-		$instance->_newRecord = false;
-		return $instance;
-	}
-
+	/**
+	 * Handles Model::findBy* Model::findAll* magic
+	 *
+	 * @param string $method 
+	 * @param string $args 
+	 * @return mixed
+	 * @throws \mongo_model\Exception
+	 */
 	public static function __callStatic($method, $args) {
 		if (strpos($method, 'findBy') === 0) {
 			$key = Inflector::underscore(substr($method, 6));
@@ -103,24 +91,6 @@ abstract class Model extends \rox\ActiveModel {
 	}
 
 	/**
-	 * Returns the modified attributes
-	 *
-	 * @return array
-	 */
-	public function modifiedAttributes() {
-		$data = array();
-		foreach ($this->_modifiedAttributes as $attribute) {
-			$data[$attribute] = $this->_data[$attribute];
-		}
-
-		return $data;
-	}
-
-	public function mongoId() {
-		return new \MongoId($this->getId());
-	}
-
-	/**
 	 * Saves the document
 	 *
 	 * @return boolean
@@ -135,6 +105,10 @@ abstract class Model extends \rox\ActiveModel {
 		$attributes = $this->modifiedAttributes();
 		if (empty($attributes)) {
 			return false;
+		}
+
+		foreach ($this->_embedded as $name => $collection) {
+			$attributes[$name] = $collection->serializeForSaving();
 		}
 
 		if ($this->_newRecord) {
@@ -165,7 +139,7 @@ abstract class Model extends \rox\ActiveModel {
 			throw new Exception("Couldn't find record with ID = {$id}");
 		}
 
-		return static::_fromMongoData($result);;
+		return static::fromMongoData($result);;
 	}
 
 	/**
@@ -223,7 +197,7 @@ abstract class Model extends \rox\ActiveModel {
 		$records = array();
 
 		foreach ($cursor as $result) {
-			$records[] = static::_fromMongoData($result);;
+			$records[] = static::fromMongoData($result);;
 		}
 
 		return $records;

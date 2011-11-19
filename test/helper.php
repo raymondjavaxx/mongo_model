@@ -14,12 +14,11 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-define('LIBRARIES_PATH', dirname(dirname(dirname(__DIR__))) . '/libraries/');
-define('APP_LIBRARIES_PATH', dirname(__DIR__) . '/libraries/');
+define('LIBRARIES_PATH', dirname(__DIR__) . '/libraries/');
 
 set_include_path(implode(PATH_SEPARATOR, array(
 	LIBRARIES_PATH,
-	APP_LIBRARIES_PATH,
+	__DIR__ . '/mocks',
 	get_include_path()
 )));
 
