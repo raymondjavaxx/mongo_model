@@ -12,10 +12,6 @@
  * @license The MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-namespace mongo_model\test\cases;
-
-require_once dirname(__DIR__) . '/helper.php';
-
 use \mongo_model\ConnectionManager;
 
 class ConnectionManagerTest extends \PHPUnit_Framework_TestCase {
