@@ -19,8 +19,8 @@ class ManyTest extends \PHPUnit_Framework_TestCase {
 
 	public function testFromMongoData() {
 		$data = array(
-			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'James', 'message' => 'Hello'),
-			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'Armaan', 'message' => 'Hello')
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'James', 'body' => 'Hello'),
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'Armaan', 'body' => 'Hello')
 		);
 
 		$result = Many::fromMongoData(new MockPost, 'mock_comments', $data);
@@ -33,13 +33,21 @@ class ManyTest extends \PHPUnit_Framework_TestCase {
 
 	public function testSerializeForSaving() {
 		$data = array(
-			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'James', 'message' => 'Hello'),
-			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'Armaan', 'message' => 'Hello')
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'James', 'body' => 'Hello'),
+			array('_id' => new \MongoId('4e74f5554cfb452b6e000000'), 'author' => 'Armaan', 'body' => 'Hello')
 		);
 
 		$collection = Many::fromMongoData(new MockPost, 'mock_comments', $data);
 		$result = $collection->serializeForSaving();
 
 		$this->assertEquals($data, $result);
+	}
+
+	public function testSerializeForSavingWithoutIds() {
+		$collection = new Many(new MockPost, array());
+		$collection[] = new MockComment(array('author' => 'James', 'body' => 'Hello'));
+
+		$result = $collection->serializeForSaving();
+		$this->assertInstanceOf('\MongoId', $result[0]['_id']);
 	}
 }
