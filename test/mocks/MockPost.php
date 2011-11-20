@@ -18,13 +18,13 @@ class MockPost extends \mongo_model\Model {
 
 	protected static $_embedsMany = array('mock_comments');
 
-    protected static $_schema = array(
-        'title' => 'string',
-        'body' => 'string',
-        'author' => 'string'
-    );
-
-    protected function _validate() {
-        // validation code
-    }
+	protected static $_schema = array(
+		'title' => 'string',
+		'body' => 'string',
+		'author' => 'string'
+	);
+	
+	protected function _validate() {
+		$this->_validatesPresenceOf(array('title', 'body', 'author'));
+	}
 }

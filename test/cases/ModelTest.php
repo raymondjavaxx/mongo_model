@@ -31,6 +31,16 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($post->save());
 	}
 
+	public function testSaveWithInvalidData() {
+		$post = MockPost::create(array('title' => 'Hello 1', 'body' => '', 'author' => ''));
+		$this->assertFalse($post->save());
+	}
+
+	public function testSaveOnNonModifiedDocumentShouldReturnFalse() {
+		$post = MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+		$this->assertFalse($post->save());
+	}
+
 	public function testUpdate() {
 		$post = new MockPost(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
 		$post->save();
@@ -63,6 +73,15 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$revision = $post->revision;
 	}
 
+	public function testInvalidAttributeExceptionOnSetter() {
+		$post = MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+
+		$this->setExpectedException('\mongo_model\Exception');
+
+		// try to set an attribute that is not defined in the schema
+		$post->revision = 3;
+	}
+
 	public function testFind() {
 		$post = MockPost::create(array(
 			'title' => 'Hello 1',
@@ -81,6 +100,21 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$result = MockPost::findFirst(array('conditions' => array('author' => 'James')));
 		$this->assertTrue(is_object($result));
 		$this->assertSame('Hello 1', $result->title);
+	}
+
+	public function testFindAll() {
+		MockPost::create(array('title' => 'Hello 1', 'body' => 'Hello World 1!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 2', 'body' => 'Hello World 2!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 3', 'body' => 'Hello World 3!', 'author' => 'James'));
+		MockPost::create(array('title' => 'Hello 4', 'body' => 'Hello World 4!', 'author' => 'James'));
+
+		$results = MockPost::findAll(array(
+			'conditions' => array('author' => 'James'),
+			'order' => array('title' => -1)
+		));
+
+		$this->assertEquals(4, count($results));
+		$this->assertSame('Hello 4', $results[0]->title);
 	}
 
 	public function testPaginate() {
@@ -129,6 +163,23 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$results = MockPost::findAllByAuthor('James');
 		$this->assertTrue(is_array($results));
 		$this->assertEquals(2, count($results));
+	}
+
+	public function testCallStaticException() {
+		$this->setExpectedException('\mongo_model\Exception');
+		MockPost::nonExisting();
+	}
+
+	public function testDelete() {
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$post->delete();
+		$this->assertEquals(0, MockPost::findCount(array('_id' => $post->mongoId())));
+	}
+
+	public function testDeleteOnNewRecordShouldThrowException() {
+		$post = new MockPost;
+		$this->setExpectedException('\mongo_model\Exception');
+		$post->delete();
 	}
 
 	public function testEmbedded() {

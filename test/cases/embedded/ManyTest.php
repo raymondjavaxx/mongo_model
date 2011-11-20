@@ -50,4 +50,20 @@ class ManyTest extends \PHPUnit_Framework_TestCase {
 		$result = $collection->serializeForSaving();
 		$this->assertInstanceOf('\MongoId', $result[0]['_id']);
 	}
+
+	public function testArrayAccessInterfaceImplementation() {
+		$collection = new Many(new MockPost, array());
+		$collection[] = new MockComment(array('author' => 'James', 'body' => 'Hello'));
+		$collection[] = new MockComment(array('author' => 'John', 'body' => 'Hello'));
+
+		$this->assertTrue(isset($collection[0]));
+		$this->assertTrue(isset($collection[1]));
+		$this->assertFalse(isset($collection[2]));
+
+		unset($collection[1]);
+		$this->assertFalse(isset($collection[1]));
+
+		$collection[2] = new MockComment(array('author' => 'Mike', 'body' => 'Hello'));
+		$this->assertTrue(isset($collection[2]));
+	}
 }

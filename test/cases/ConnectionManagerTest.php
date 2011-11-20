@@ -25,4 +25,9 @@ class ConnectionManagerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_object($datasource));
 		$this->assertTrue($datasource instanceof \MongoDB);
 	}
+
+	public function testGetDatasourceWhithNonExistingConfig() {
+		$this->setExpectedException('\mongo_model\Exception');
+		$datasource = ConnectionManager::getDataSource('mongo_model_test_non_existing');
+	}
 }
