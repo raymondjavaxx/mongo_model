@@ -12,21 +12,16 @@
  * @license The MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-class MockPost extends \mongo_model\Model {
+class MockProduct extends \mongo_model\Model {
 
 	protected static $_dataSourceName = 'mongo_model_test';
 
-	protected static $_embedsMany = array('mock_comments');
-
-	protected static $_references = array('mock_product');
-
 	protected static $_schema = array(
-		'title' => 'string',
-		'body' => 'string',
-		'author' => 'string'
+		'name' => 'string',
+		'price' => 'double',
 	);
-	
+
 	protected function _validate() {
-		$this->_validatesPresenceOf(array('title', 'body', 'author'));
+		// Validation code
 	}
 }

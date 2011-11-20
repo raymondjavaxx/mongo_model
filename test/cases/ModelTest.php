@@ -19,6 +19,7 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 	protected function setUp() {
 		ConnectionManager::setConfig('mongo_model_test', array('database' => 'mongo_model_test'));
 		MockPost::collection()->drop();
+		MockProduct::collection()->drop();
 	}
 
 	public function testSave() {
@@ -180,6 +181,23 @@ class ModelTest extends \PHPUnit_Framework_TestCase {
 		$post = new MockPost;
 		$this->setExpectedException('\mongo_model\Exception');
 		$post->delete();
+	}
+
+	public function testReferences() {
+		$product = MockProduct::create(array('name' => 'Test Product', 'price' => 9.99));
+
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$post->setMockProduct($product);
+		$post->save();
+
+		$savedPost = MockPost::find($post->id);
+		$this->assertEquals($product->mongoId(), $savedPost->mockProduct()->mongoId());
+	}
+
+	public function testReferencesWithNull() {
+		$post = MockPost::create(array('title' => 'Hello', 'body' => 'Hello World!', 'author' => 'James'));
+		$post->setMockProduct(null);
+		$post->save();
 	}
 
 	public function testEmbedded() {

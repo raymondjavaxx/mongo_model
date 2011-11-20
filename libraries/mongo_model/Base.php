@@ -29,10 +29,59 @@ abstract class Base extends \rox\ActiveModel {
 
 	protected static $_embedsMany = array();
 
+	protected static $_references = array();
+
 	protected $_embedded = array();
+
+	protected $_referenced = array();
 
 	public static function embedded() {
 		return false;
+	}
+
+	public function setReference($name, Base $object = null) {
+		if (!in_array($name, static::$_references)) {
+			throw new Exception("Document doesn't reference {$name}");
+		}
+
+		$this->_referenced[$name] = $object;
+
+		if ($object === null) {
+			$this->_data[$name] = null;
+		} else {
+			$class = get_class($object);
+			$this->_data[$name] = \MongoDBRef::create($class::collection()->getName(), $object->mongoId());
+		}
+
+		$this->_flagAttributeAsModified($name);
+	}
+
+	public function getReference($name) {
+		if (array_key_exists($name, $this->_referenced)) {
+			return $this->_referenced[$name];
+		}
+
+		if (empty($this->_data[$name])) {
+			return null;
+		}
+
+		$class = Inflector::classify($name);
+		$this->_referenced[$name] = $class::find($this->_data[$name]['$id']);
+		return $this->_referenced[$name];
+	}
+
+	public function __call($method, $args) {
+		if (strpos($method, 'set') === 0) {
+			$key = Inflector::underscore(substr($method, 3));
+			return $this->setReference($key, $args[0]);
+		}
+
+		$key = Inflector::underscore($method);
+		if (in_array($key, static::$_references)) {			
+			return $this->getReference($key);
+		}
+
+		throw new Exception('Undefined method ' . get_called_class() . '::' . $method . '()');
 	}
 
 	public function setData($attribute, $value = null) {
