@@ -18,6 +18,7 @@ define('LIBRARIES_PATH', dirname(__DIR__) . '/libraries/');
 
 set_include_path(implode(PATH_SEPARATOR, array(
 	LIBRARIES_PATH,
+	LIBRARIES_PATH . '/roxphp/libraries',
 	__DIR__ . '/mocks',
 	get_include_path()
 )));

@@ -1,3 +1,3 @@
-[submodule "libraries/rox"]
-path = libraries/rox
-url = git://github.com/raymondjavaxx/roxphp.git
+[submodule "libraries/roxphp"]
+	path = libraries/roxphp
+	url = git://github.com/raymondjavaxx/roxphp.git
