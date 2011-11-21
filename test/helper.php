@@ -14,7 +14,7 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-define('LIBRARIES_PATH', dirname(__DIR__) . '/libraries/');
+define('LIBRARIES_PATH', dirname(__DIR__) . '/libraries');
 
 set_include_path(implode(PATH_SEPARATOR, array(
 	LIBRARIES_PATH,
