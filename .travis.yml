@@ -3,3 +3,4 @@ php:
   - 5.3
 before_script:
   - git submodule update --init
+
